@@ -15,7 +15,7 @@ IHost host = Host.CreateDefaultBuilder(args)
         services.AddHttpClient<BacenApiService>();
         services.AddHttpClient<BrasilApiService>();
 
-        // Configurando o Worker como serviço windows
+        // Configurando o Worker como serviço windows service 
         services.AddHostedService<Worker>();
     })
     .Build();
