@@ -7,14 +7,14 @@ using System.Threading.Tasks;
 public class Worker : BackgroundService
 {
     private readonly ILogger<Worker> _logger;
-    private readonly BacenApiService _bacenApiService;
     private readonly BrasilApiService _brasilApiService;
+    private readonly BacenApiService _bacenApiService;
 
-    public Worker(ILogger<Worker> logger, BacenApiService bacenApiService, BrasilApiService brasilApiService)
+    public Worker(ILogger<Worker> logger, BrasilApiService brasilApiService, BacenApiService bacenApiService)
     {
         _logger = logger;
-        _bacenApiService = bacenApiService;
         _brasilApiService = brasilApiService;
+        _bacenApiService = bacenApiService;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -23,17 +23,15 @@ public class Worker : BackgroundService
         {
             _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
 
-            // Consumir a API do Banco Central
-            var bacenData = await _bacenApiService.GetBacenDataAsync();
-            _logger.LogInformation("Dados da API Bacen obtidos com sucesso.");
+            // Consome a Brasil API
+            var bancos = await _brasilApiService.GetBancosAsync();
+            _logger.LogInformation($"Número de bancos encontrados: {bancos.Count}");
 
-            // Consumir a Brasil API
-            var bancosData = await _brasilApiService.GetBancosAsync();
-            _logger.LogInformation("Dados da Brasil API obtidos com sucesso.");
+            // Consome a API do Banco Central
+            var taxasJuros = await _bacenApiService.GetTaxasJurosAsync();
+            _logger.LogInformation($"Número de taxas de juros encontradas: {taxasJuros.Count}");
 
-            // Processamento dos dados pode ser feito aqui
-
-            await Task.Delay(300000, stoppingToken); // Executa a cada 5 minutos
+            await Task.Delay(60000, stoppingToken); // Espera 1 minuto entre cada execução
         }
     }
 }

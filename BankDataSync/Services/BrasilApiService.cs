@@ -5,46 +5,31 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net.Http;
 using Newtonsoft.Json;
+using System.Net.Http.Json;
 
 namespace BankDataSync.Services
 {
     public class BrasilApiService
     {
         private readonly HttpClient _httpClient;
+        private readonly string _baseUrl;
 
-        public BrasilApiService(HttpClient httpClient)
+        public BrasilApiService(HttpClient httpClient, IConfiguration configuration)
         {
             _httpClient = httpClient;
+            _baseUrl = configuration["BrasilApiUrl"];
         }
 
-        // URL da API da Brasil API
-        private const string BrasilApiUrl = "https://brasilapi.com.br/api/banks/v1";
-
-        public async Task<List<BancoDto>> GetBancosAsync()
+        public async Task<List<Banco>> GetBancosAsync()
         {
-            // Faz a requisição GET para a Brasil API
-            var response = await _httpClient.GetAsync(BrasilApiUrl);
-
-            if (response.IsSuccessStatusCode)
-            {
-                var content = await response.Content.ReadAsStringAsync();
-
-                // Converte a resposta JSON para uma lista de Bancos
-                var data = JsonConvert.DeserializeObject<List<BancoDto>>(content);
-                return data;
-            }
-
-            // Caso ocorra um erro, você pode fazer o log do erro e lançar uma exceção
-            throw new HttpRequestException("Falha ao obter dados da Brasil API");
+            var response = await _httpClient.GetFromJsonAsync<List<Banco>>(_baseUrl);
+            return response ?? new List<Banco>();
         }
     }
 
-    // Definição do DTO que representa os dados da API
-    public class BancoDto
+    public class Banco
     {
-        public string ISPB { get; set; }
         public string Name { get; set; }
         public string Code { get; set; }
-        public string FullName { get; set; }
     }
 }
