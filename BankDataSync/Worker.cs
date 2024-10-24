@@ -23,15 +23,38 @@ public class Worker : BackgroundService
         {
             _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
 
-            // Consome a Brasil API
+            // Passo 1: Buscar bancos na Brasil API
             var bancos = await _brasilApiService.GetBancosAsync();
-            _logger.LogInformation($"Número de bancos encontrados: {bancos.Count}");
+            if (bancos.Count == 0)
+            {
+                _logger.LogWarning("Nenhum banco encontrado na Brasil API.");
+                return;
+            }
 
-            // Consome a API do Banco Central
-            var taxasJuros = await _bacenApiService.GetTaxasJurosAsync();
-            _logger.LogInformation($"Número de taxas de juros encontradas: {taxasJuros.Count}");
+            _logger.LogInformation("Número de bancos encontrados: {count}", bancos.Count);
 
-            await Task.Delay(60000, stoppingToken); // Espera 1 minuto entre cada execução
+            // Passo 2: Iterar sobre os bancos e buscar as taxas de juros de cada banco
+            foreach (var banco in bancos)
+            {
+                _logger.LogInformation("Buscando taxas de juros para o banco: {bancoNome} (Código: {bancoCodigo})", banco.Name, banco.Code);
+
+                // Buscar as taxas de juros para o banco atual
+                var taxas = await _bacenApiService.GetTaxasJurosPorBancoAsync(banco.Code);
+
+                if (taxas.Count == 0)
+                {
+                    _logger.LogWarning("Nenhuma taxa de juros encontrada para o banco: {bancoNome} (Código: {bancoCodigo})", banco.Name, banco.Code);
+                }
+                else
+                {
+                    _logger.LogInformation("Número de taxas de juros encontradas para o banco {bancoNome}: {count}", banco.Name, taxas.Count);
+
+                    // Aqui você pode logar mais informações ou processar as taxas conforme necessário.
+                }
+            }
+
+            // Definir intervalo entre execuções (1 minuto no exemplo)
+            await Task.Delay(60000, stoppingToken);
         }
     }
 }
