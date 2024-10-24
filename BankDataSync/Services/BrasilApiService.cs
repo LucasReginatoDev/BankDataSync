@@ -30,6 +30,6 @@ namespace BankDataSync.Services
     public class Banco
     {
         public string Name { get; set; }
-        public string Code { get; set; }
+        public int? Code { get; set; }
     }
 }

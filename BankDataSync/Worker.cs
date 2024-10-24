@@ -39,7 +39,7 @@ public class Worker : BackgroundService
                 _logger.LogInformation("Buscando taxas de juros para o banco: {bancoNome} (Código: {bancoCodigo})", banco.Name, banco.Code);
 
                 // Buscar as taxas de juros para o banco atual
-                var taxas = await _bacenApiService.GetTaxasJurosPorBancoAsync(banco.Code);
+                var taxas = await _bacenApiService.GetTaxasJurosPorBancoAsync(banco.Code.ToString());
 
                 if (taxas.Count == 0)
                 {
