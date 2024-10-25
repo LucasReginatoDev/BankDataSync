@@ -28,7 +28,7 @@ namespace BankDataSync.Services
         }
     }
 
-    public class Banco
+    public class Banco // Está retornando todos os bancos, fazer filtro.
     {
         [JsonPropertyName("name")]
         public string? Name { get; set; }
