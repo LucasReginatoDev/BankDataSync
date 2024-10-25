@@ -35,12 +35,12 @@ public class Worker : BackgroundService
             _logger.LogInformation("Número de bancos encontrados: {count}", bancos.Count);
 
             // Passo 2: Iterar sobre os bancos e buscar as taxas de juros de cada banco
-            foreach (var banco in bancos)
+            foreach (Banco banco in bancos)
             {
                 _logger.LogInformation("Buscando taxas de juros para o banco: {bancoNome} (Código: {bancoCodigo})", banco.Name, banco.Code);
 
-                // Buscar as taxas de juros usando o nome do banco (em vez de código)
-                var taxas = await _bacenApiService.GetTaxasJurosPorBancoAsync(banco.Name);
+                // Buscar as taxas de juros usando o nome
+                List<BacenApiService.TaxaJurosDiaria>? taxas = await _bacenApiService.GetTaxasJurosPorBancoAsync(banco.Name);
 
                 if (taxas == null || taxas.Count == 0)
                 {

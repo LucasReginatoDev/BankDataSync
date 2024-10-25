@@ -22,7 +22,7 @@ namespace BankDataSync.Services
         }
 
         // Método para buscar taxas de juros por banco
-        public async Task<List<TaxaJurosDiaria>> GetTaxasJurosPorBancoAsync(string bancoCodigo)
+        public async Task<List<TaxaJurosDiaria>?> GetTaxasJurosPorBancoAsync(string bancoCodigo)
         {
             var url = $"https://olinda.bcb.gov.br/olinda/servico/taxaJuros/versao/v2/odata/TaxasJurosDiariaPorInicioPeriodo?$filter=InstituicaoFinanceira eq '{bancoCodigo}'&$top=50&$format=json";
 
@@ -33,41 +33,41 @@ namespace BankDataSync.Services
             var resultado = JsonConvert.DeserializeObject<RespostaTaxaJurosDiaria>(response);
 
             // Retornar a lista de taxas de juros do campo `value`
-            return resultado?.value;
+            return resultado?.Value;
         }
 
 
         public class TaxaJurosDiaria
         {
             [JsonPropertyName("InicioPeriodo")]
-            public string InicioPeriodo { get; set; }
+            public string? InicioPeriodo { get; set; }
 
             [JsonPropertyName("FimPeriodo")]
-            public string FimPeriodo { get; set; }
+            public string? FimPeriodo { get; set; }
 
             [JsonPropertyName("Segmento")]
-            public string Segmento { get; set; }
+            public string? Segmento { get; set; }
 
             [JsonPropertyName("Modalidade")]
-            public string Modalidade { get; set; }
+            public string? Modalidade { get; set; }
 
             [JsonPropertyName("Posicao")]
-            public int Posicao { get; set; }
+            public int? Posicao { get; set; }
 
             [JsonPropertyName("InstituicaoFinanceira")]
-            public string InstituicaoFinanceira { get; set; }
+            public string? InstituicaoFinanceira { get; set; }
 
             [JsonPropertyName("TaxaJurosAoMes")]
-            public double TaxaJurosAoMes { get; set; }
+            public double? TaxaJurosAoMes { get; set; }
 
             [JsonPropertyName("TaxaJurosAoAno")]
-            public double TaxaJurosAoAno { get; set; }
+            public double? TaxaJurosAoAno { get; set; }
         }
 
         public class RespostaTaxaJurosDiaria
         {
             [JsonProperty("value")]
-            public List<TaxaJurosDiaria> Value { get; set; }
+            public List<TaxaJurosDiaria> ?Value { get; set; }
         }
     }
 }
