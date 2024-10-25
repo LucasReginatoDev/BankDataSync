@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Net.Http;
 using Newtonsoft.Json;
 using System.Net.Http.Json;
+using System.Text.Json.Serialization;
 
 namespace BankDataSync.Services
 {
@@ -29,7 +30,10 @@ namespace BankDataSync.Services
 
     public class Banco
     {
-        public string Name { get; set; }
+        [JsonPropertyName("name")]
+        public string? Name { get; set; }
+
+        [JsonPropertyName("code")]
         public int? Code { get; set; }
     }
 }

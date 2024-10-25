@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Net.Http;
 using Newtonsoft.Json;
 using System.Net.Http.Json;
+using System.Text.Json.Serialization;
 
 namespace BankDataSync.Services
 {
@@ -21,33 +22,52 @@ namespace BankDataSync.Services
         }
 
         // Método para buscar taxas de juros por banco
-        public async Task<List<TaxaJuros>> GetTaxasJurosPorBancoAsync(string bancoCodigo)
+        public async Task<List<TaxaJurosDiaria>> GetTaxasJurosPorBancoAsync(string bancoCodigo)
         {
-            try
-            {
-                string url = $"https://olinda.bcb.gov.br/olinda/servico/taxaJuros/versao/v2/odata/TaxasJurosDiariaPorInicioPeriodo?$filter=InstituicaoFinanceira eq '{bancoCodigo}'&$top=50&$format=json";
-                HttpResponseMessage response = await _httpClient.GetAsync(url);
+            var url = $"https://olinda.bcb.gov.br/olinda/servico/taxaJuros/versao/v2/odata/TaxasJurosDiariaPorInicioPeriodo?$filter=InstituicaoFinanceira eq '{bancoCodigo}'&$top=50&$format=json";
 
-                response.EnsureSuccessStatusCode();
+            using var httpClient = new HttpClient();
+            var response = await httpClient.GetStringAsync(url);
 
-                string content = await response.Content.ReadAsStringAsync();
-                var taxas = JsonConvert.DeserializeObject<List<TaxaJuros>>(content);
-                return taxas ?? new List<TaxaJuros>();
-            }
-            catch (HttpRequestException ex)
-            {
-                _logger.LogError($"Erro ao buscar taxas de juros para o banco {bancoCodigo}: {ex.Message}");
-                return new List<TaxaJuros>();
-            }
+            // Desserializar para a classe RespostaTaxaJurosDiaria
+            var resultado = JsonConvert.DeserializeObject<RespostaTaxaJurosDiaria>(response);
+
+            // Retornar a lista de taxas de juros do campo `value`
+            return resultado?.value;
         }
 
-        public class TaxaJuros
+
+        public class TaxaJurosDiaria
         {
+            [JsonPropertyName("InicioPeriodo")]
+            public string InicioPeriodo { get; set; }
+
+            [JsonPropertyName("FimPeriodo")]
+            public string FimPeriodo { get; set; }
+
+            [JsonPropertyName("Segmento")]
+            public string Segmento { get; set; }
+
+            [JsonPropertyName("Modalidade")]
+            public string Modalidade { get; set; }
+
+            [JsonPropertyName("Posicao")]
+            public int Posicao { get; set; }
+
+            [JsonPropertyName("InstituicaoFinanceira")]
             public string InstituicaoFinanceira { get; set; }
-            public DateTime DataReferencia { get; set; }
-            public double TaxaJurosAoAno { get; set; }
+
+            [JsonPropertyName("TaxaJurosAoMes")]
             public double TaxaJurosAoMes { get; set; }
-            public double Modalidade { get; set; }
+
+            [JsonPropertyName("TaxaJurosAoAno")]
+            public double TaxaJurosAoAno { get; set; }
+        }
+
+        public class RespostaTaxaJurosDiaria
+        {
+            [JsonProperty("value")]
+            public List<TaxaJurosDiaria> Value { get; set; }
         }
     }
 }

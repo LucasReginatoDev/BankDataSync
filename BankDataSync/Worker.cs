@@ -1,6 +1,7 @@
 using BankDataSync.Services;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -21,7 +22,7 @@ public class Worker : BackgroundService
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
+            _logger.LogInformation("Worker rodando em: {time}", DateTimeOffset.Now);
 
             // Passo 1: Buscar bancos na Brasil API
             var bancos = await _brasilApiService.GetBancosAsync();
@@ -38,10 +39,10 @@ public class Worker : BackgroundService
             {
                 _logger.LogInformation("Buscando taxas de juros para o banco: {bancoNome} (Código: {bancoCodigo})", banco.Name, banco.Code);
 
-                // Buscar as taxas de juros para o banco atual
-                var taxas = await _bacenApiService.GetTaxasJurosPorBancoAsync(banco.Code.ToString());
+                // Buscar as taxas de juros usando o nome do banco (em vez de código)
+                var taxas = await _bacenApiService.GetTaxasJurosPorBancoAsync(banco.Name);
 
-                if (taxas.Count == 0)
+                if (taxas == null || taxas.Count == 0)
                 {
                     _logger.LogWarning("Nenhuma taxa de juros encontrada para o banco: {bancoNome} (Código: {bancoCodigo})", banco.Name, banco.Code);
                 }
@@ -49,12 +50,18 @@ public class Worker : BackgroundService
                 {
                     _logger.LogInformation("Número de taxas de juros encontradas para o banco {bancoNome}: {count}", banco.Name, taxas.Count);
 
-                    // Aqui você pode logar mais informações ou processar as taxas conforme necessário.
+                    // Log de detalhes de cada taxa de juros (opcional)
+                    foreach (var taxa in taxas)
+                    {
+                        _logger.LogInformation(
+                            "Banco: {banco}, Modalidade: {modalidade}, Taxa ao Mês: {taxaMes}%, Taxa ao Ano: {taxaAno}%",
+                            taxa.InstituicaoFinanceira, taxa.Modalidade, taxa.TaxaJurosAoMes, taxa.TaxaJurosAoAno);
+                    }
                 }
             }
 
-            // Definir intervalo entre execuções (1 minuto no exemplo)
-            await Task.Delay(60000, stoppingToken);
+            // Intervalo de execução definido para 5 minutos
+            await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken);
         }
     }
 }
