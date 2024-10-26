@@ -20,6 +20,7 @@ public class Worker : BackgroundService
         JsonStorageService jsonStorageService)
     {
         _logger = logger;
+        _logger.LogInformation("Worker constructor initialized");
         _brasilApiService = brasilApiService;
         _bacenApiService = bacenApiService;
         _jsonStorageService = jsonStorageService;
@@ -39,48 +40,43 @@ public class Worker : BackgroundService
                 return;
             }
 
-            // Lista para armazenar os dados de todas as taxas de juros
             var dadosConsolidados = new List<object>();
 
             // Passo 2: Iterar sobre os bancos e buscar as taxas de juros de cada banco
             foreach (var banco in bancos)
             {
-                _logger.LogInformation("Buscando taxas de juros para o banco: {bancoNome}", banco.Name);
-
-                // Buscar as taxas de juros usando o nome do banco
-                var taxas = await _bacenApiService.GetTaxasJurosPorBancoAsync(banco.Name);
-
-                if (taxas == null || taxas.Count == 0)
+                try
                 {
-                    _logger.LogWarning("Nenhuma taxa de juros encontrada para o banco: {bancoNome}", banco.Name);
+                    _logger.LogInformation("Buscando taxas de juros para o banco: {bancoNome}", banco.Name);
 
-                    // Adiciona uma entrada indicando que nenhuma taxa foi encontrada
-                    dadosConsolidados.Add(new
+                    // Buscar as taxas de juros usando o nome do banco
+                    var taxas = await _bacenApiService.GetTaxasJurosPorBancoAsync(banco.Name);
+
+                    if (taxas == null || taxas.Count == 0)
                     {
-                        Banco = banco.Name,
-                        Codigo = banco.Code,
-                        TaxasJuros = "Nenhuma taxa de juros encontrada"
-                    });
+                        _logger.LogWarning("Nenhuma taxa de juros encontrada para o banco: {bancoNome}", banco.Name);
+                        dadosConsolidados.Add(new { Banco = banco.Name, Codigo = banco.Code, TaxasJuros = "Nenhuma taxa de juros encontrada" });
+                    }
+                    else
+                    {
+                        dadosConsolidados.Add(new { Banco = banco.Name, Codigo = banco.Code, TaxasJuros = taxas });
+                        _logger.LogInformation("Dados de taxas de juros adicionados para o banco: {bancoNome}", banco.Name);
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    // Adiciona as taxas de juros e o nome do banco à lista consolidada
-                    dadosConsolidados.Add(new
-                    {
-                        Banco = banco.Name,
-                        Codigo = banco.Code,
-                        TaxasJuros = taxas
-                    });
-                    _logger.LogInformation("Dados de taxas de juros adicionados para o banco: {bancoNome}", banco.Name);
+                    _logger.LogError(ex, "Erro ao buscar taxas de juros para o banco: {bancoNome}", banco.Name);
+                    // Registra erro no JSON para o banco atual
+                    dadosConsolidados.Add(new { Banco = banco.Name, Codigo = banco.Code, Erro = "Falha na obtenção de dados: " + ex.Message });
                 }
             }
 
-            // Salva todos os dados em um único arquivo JSON
+            // Salva todos os dados (incluindo erros) em um único arquivo JSON
             _jsonStorageService.SaveToJson(dadosConsolidados);
             _logger.LogInformation("Dados de todas as taxas de juros salvos em arquivo JSON.");
 
-            // Aguardar 5 minutos antes de repetir o processo
             await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken);
         }
     }
+
 }

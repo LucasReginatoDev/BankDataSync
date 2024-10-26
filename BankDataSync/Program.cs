@@ -1,25 +1,45 @@
 using BankDataSync.Services;
+using System;
+using System.Net.Http;
 using Serilog;
-using Serilog.Events;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Polly;
+using Polly.Extensions.Http;
+
+static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
+{
+    return HttpPolicyExtensions
+        .HandleTransientHttpError() // Lida com erros de rede e respostas 5XX
+        .Or<TaskCanceledException>() // Inclui timeouts
+        .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))); // Delay exponencial entre tentativas
+}
 
 IHost host = Host.CreateDefaultBuilder(args)
     .UseSerilog((context, services, configuration) => configuration
-        .WriteTo.Console() // Loga no console
-        .WriteTo.File("logs/log.txt", rollingInterval: RollingInterval.Day) // Loga em arquivo
+        .WriteTo.Console()
+        .WriteTo.File("logs/log.txt", rollingInterval: RollingInterval.Day)
     )
     .ConfigureServices(services =>
     {
-        // Configuração dos serviços de HttpClient
-        services.AddHttpClient<BacenApiService>();
-        services.AddHttpClient<BrasilApiService>();
+        // Configuração do HttpClient para BacenApiService com Polly e Timeout
+        services.AddHttpClient<BacenApiService>(client =>
+        {
+            client.Timeout = TimeSpan.FromMinutes(1);
+        })
+        .AddPolicyHandler(GetRetryPolicy());
 
-        // Adiciona JsonStorageService ao contêiner de DI
-        services.AddSingleton<JsonStorageService>();
+        services.AddHttpClient<BrasilApiService>(client =>
+        {
+            client.Timeout = TimeSpan.FromMinutes(1);
+        })
+        .AddPolicyHandler(GetRetryPolicy());
 
-        // Configurando o Worker como serviço windows service 
+        // Adiciona o Worker como um serviço hospedado
         services.AddHostedService<Worker>();
+
+        // Adiciona o JsonStorageService
+        services.AddSingleton<JsonStorageService>();
     })
     .Build();
 
