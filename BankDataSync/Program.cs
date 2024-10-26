@@ -17,6 +17,7 @@ static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
 }
 
 IHost host = Host.CreateDefaultBuilder(args)
+    .UseWindowsService() // Adiciona suporte para execução como Windows Service
     .UseSerilog((context, services, configuration) => configuration
         .WriteTo.Console()
         .WriteTo.File("logs/log.txt", rollingInterval: RollingInterval.Day)
