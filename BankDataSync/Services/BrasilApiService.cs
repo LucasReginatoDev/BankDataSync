@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.Extensions.Hosting.WindowsServices;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;

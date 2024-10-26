@@ -4,6 +4,7 @@ using System.Net.Http;
 using Serilog;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Hosting.WindowsServices;
 using Polly;
 using Polly.Extensions.Http;
 
