@@ -7,6 +7,7 @@ using System.Net.Http;
 using Newtonsoft.Json;
 using System.Net.Http.Json;
 using System.Text.Json.Serialization;
+using System.IO;
 
 namespace BankDataSync.Services
 {
@@ -71,5 +72,51 @@ namespace BankDataSync.Services
     {
         [JsonProperty("value")]
         public List<TaxaJurosDiaria>? Value { get; set; }
+    }
+
+    public class JsonStorageService
+    {
+        private readonly string _outputDirectory = "DataStorage";
+        private readonly string _fileName = "TaxasJuros.json"; // Nome fixo para o arquivo JSON
+
+        public JsonStorageService()
+        {
+            // Cria o diretório para armazenar o arquivo JSON, caso não exista
+            if (!Directory.Exists(_outputDirectory))
+            {
+                Directory.CreateDirectory(_outputDirectory);
+            }
+        }
+
+        // Método para salvar todos os dados em um único arquivo JSON, substituindo o arquivo anterior
+        public void SaveToJson(List<object> dadosConsolidados)
+        {
+            string filePath = Path.Combine(_outputDirectory, _fileName);
+
+            try
+            {
+                // Verifica e deleta o arquivo anterior, se existir
+                if (File.Exists(filePath))
+                {
+                    File.Delete(filePath);
+                }
+
+                // Cria um objeto para armazenar a data da consulta e os dados consolidados
+                var dadosArquivo = new
+                {
+                    DataConsulta = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                    Bancos = dadosConsolidados
+                };
+
+                // Serializa os dados incluindo a data e hora da consulta
+                string jsonData = JsonConvert.SerializeObject(dadosArquivo, Formatting.Indented);
+                File.WriteAllText(filePath, jsonData);
+                Console.WriteLine($"Dados salvos em JSON no caminho: {filePath}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao salvar dados em JSON: {ex.Message}");
+            }
+        }
     }
 }

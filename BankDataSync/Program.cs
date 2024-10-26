@@ -15,6 +15,9 @@ IHost host = Host.CreateDefaultBuilder(args)
         services.AddHttpClient<BacenApiService>();
         services.AddHttpClient<BrasilApiService>();
 
+        // Adiciona JsonStorageService ao contêiner de DI
+        services.AddSingleton<JsonStorageService>();
+
         // Configurando o Worker como serviço windows service 
         services.AddHostedService<Worker>();
     })

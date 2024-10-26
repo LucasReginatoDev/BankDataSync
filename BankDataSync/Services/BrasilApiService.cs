@@ -51,7 +51,7 @@ namespace BankDataSync.Services
         /// </summary>
         /// <returns>Lista filtrada com os bancos mais relevantes</returns>
         
-        public async Task<List<Banco>> GetBancosRelevantesAsync()
+        public async Task<List<Banco>> GetBancosAsync()
         {
             // Realiza a requisição para obter todos os bancos
             var response = await _httpClient.GetFromJsonAsync<List<Banco>>(_baseUrl);
