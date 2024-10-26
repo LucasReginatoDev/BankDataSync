@@ -22,52 +22,54 @@ namespace BankDataSync.Services
         }
 
         // Método para buscar taxas de juros por banco
-        public async Task<List<TaxaJurosDiaria>?> GetTaxasJurosPorBancoAsync(string bancoCodigo)
+        public async Task<List<TaxaJurosDiaria>> GetTaxasJurosPorBancoAsync(string bancoNome)
         {
-            var url = $"https://olinda.bcb.gov.br/olinda/servico/taxaJuros/versao/v2/odata/TaxasJurosDiariaPorInicioPeriodo?$filter=InstituicaoFinanceira eq '{bancoCodigo}'&$top=50&$format=json";
+            var url = $"https://olinda.bcb.gov.br/olinda/servico/taxaJuros/versao/v2/odata/TaxasJurosDiariaPorInicioPeriodo?$filter=InstituicaoFinanceira eq '{bancoNome}'&$top=50&$format=json";
 
-            using var httpClient = new HttpClient();
-            var response = await httpClient.GetStringAsync(url);
+            try
+            {
+                var response = await _httpClient.GetStringAsync(url);
+                var resultado = JsonConvert.DeserializeObject<RespostaTaxaJurosDiaria>(response);
+                return resultado?.Value ?? new List<TaxaJurosDiaria>();
+            }
+            catch (HttpRequestException ex)
+            {
+                _logger.LogError(ex, "Erro ao buscar taxas de juros da API do Bacen.");
+                return new List<TaxaJurosDiaria>();
+            }
+        }        
+    }
 
-            // Desserializar para a classe RespostaTaxaJurosDiaria
-            var resultado = JsonConvert.DeserializeObject<RespostaTaxaJurosDiaria>(response);
+    public class TaxaJurosDiaria
+    {
+        [JsonPropertyName("InicioPeriodo")]
+        public string? InicioPeriodo { get; set; }
 
-            // Retornar a lista de taxas de juros do campo `value`
-            return resultado?.Value;
-        }
+        [JsonPropertyName("FimPeriodo")]
+        public string? FimPeriodo { get; set; }
 
+        [JsonPropertyName("Segmento")]
+        public string? Segmento { get; set; }
 
-        public class TaxaJurosDiaria
-        {
-            [JsonPropertyName("InicioPeriodo")]
-            public string? InicioPeriodo { get; set; }
+        [JsonPropertyName("Modalidade")]
+        public string? Modalidade { get; set; }
 
-            [JsonPropertyName("FimPeriodo")]
-            public string? FimPeriodo { get; set; }
+        [JsonPropertyName("Posicao")]
+        public int? Posicao { get; set; }
 
-            [JsonPropertyName("Segmento")]
-            public string? Segmento { get; set; }
+        [JsonPropertyName("InstituicaoFinanceira")]
+        public string? InstituicaoFinanceira { get; set; }
 
-            [JsonPropertyName("Modalidade")]
-            public string? Modalidade { get; set; }
+        [JsonPropertyName("TaxaJurosAoMes")]
+        public double? TaxaJurosAoMes { get; set; }
 
-            [JsonPropertyName("Posicao")]
-            public int? Posicao { get; set; }
+        [JsonPropertyName("TaxaJurosAoAno")]
+        public double? TaxaJurosAoAno { get; set; }
+    }
 
-            [JsonPropertyName("InstituicaoFinanceira")]
-            public string? InstituicaoFinanceira { get; set; }
-
-            [JsonPropertyName("TaxaJurosAoMes")]
-            public double? TaxaJurosAoMes { get; set; }
-
-            [JsonPropertyName("TaxaJurosAoAno")]
-            public double? TaxaJurosAoAno { get; set; }
-        }
-
-        public class RespostaTaxaJurosDiaria
-        {
-            [JsonProperty("value")]
-            public List<TaxaJurosDiaria> ?Value { get; set; }
-        }
+    public class RespostaTaxaJurosDiaria
+    {
+        [JsonProperty("value")]
+        public List<TaxaJurosDiaria>? Value { get; set; }
     }
 }

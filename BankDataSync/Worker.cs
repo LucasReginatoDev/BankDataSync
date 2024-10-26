@@ -2,6 +2,7 @@ using BankDataSync.Services;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -24,27 +25,27 @@ public class Worker : BackgroundService
         {
             _logger.LogInformation("Worker rodando em: {time}", DateTimeOffset.Now);
 
-            // Passo 1: Buscar bancos na Brasil API
-            var bancos = await _brasilApiService.GetBancosAsync();
+            // Passo 1: Buscar apenas os bancos relevantes na Brasil API
+            var bancos = await _brasilApiService.GetBancosRelevantesAsync();
             if (bancos.Count == 0)
             {
-                _logger.LogWarning("Nenhum banco encontrado na Brasil API.");
+                _logger.LogWarning("Nenhum banco relevante encontrado na Brasil API.");
                 return;
             }
 
-            _logger.LogInformation("Número de bancos encontrados: {count}", bancos.Count);
+            _logger.LogInformation("Número de bancos relevantes encontrados: {count}", bancos.Count);
 
-            // Passo 2: Iterar sobre os bancos e buscar as taxas de juros de cada banco
+            // Passo 2: Iterar sobre os bancos relevantes e buscar as taxas de juros de cada um, agora usando o nome do banco
             foreach (Banco banco in bancos)
             {
-                _logger.LogInformation("Buscando taxas de juros para o banco: {bancoNome} (Código: {bancoCodigo})", banco.Name, banco.Code);
+                _logger.LogInformation("Buscando taxas de juros para o banco: {bancoNome}", banco.Name);
 
-                // Buscar as taxas de juros usando o nome
-                List<BacenApiService.TaxaJurosDiaria>? taxas = await _bacenApiService.GetTaxasJurosPorBancoAsync(banco.Name);
+                // Usar o nome do banco para buscar as taxas de juros
+                List<TaxaJurosDiaria>? taxas = await _bacenApiService.GetTaxasJurosPorBancoAsync(banco.Name);
 
                 if (taxas == null || taxas.Count == 0)
                 {
-                    _logger.LogWarning("Nenhuma taxa de juros encontrada para o banco: {bancoNome} (Código: {bancoCodigo})", banco.Name, banco.Code);
+                    _logger.LogWarning("Nenhuma taxa de juros encontrada para o banco: {bancoNome}", banco.Name);
                 }
                 else
                 {
