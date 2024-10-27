@@ -1,74 +1,74 @@
 # Bank Data Sync Service
 
-## Descrição do Projeto
-O **Bank Data Sync Service** é um serviço Windows desenvolvido em C# (.NET 6) que integra duas APIs públicas para buscar informações sobre bancos e taxas de juros. O serviço coleta dados da **Brasil API** para obter uma lista de bancos e seus códigos, e em seguida, consulta a **API do Banco Central** para obter informações de taxas de juros relacionadas a cada banco. Os dados obtidos são processados e armazenados em um arquivo JSON para futuras análises.
+## DescriÃ§Ã£o do Projeto
+O **Bank Data Sync Service** Ã© um serviÃ§o Windows desenvolvido em C# (.NET 6) que integra duas APIs pÃºblicas para buscar informaÃ§Ãµes sobre bancos e taxas de juros. O serviÃ§o coleta dados da **Brasil API** para obter uma lista de bancos e seus cÃ³digos, e em seguida, consulta a **API do Banco Central** para obter informaÃ§Ãµes de taxas de juros relacionadas a cada banco. Os dados obtidos sÃ£o processados e armazenados em um arquivo JSON para futuras anÃ¡lises.
 
 ## Funcionalidades Implementadas
 
-- **Integração com APIs Públicas**:
-  - **Brasil API**: Busca informações de bancos e códigos.
+- **IntegraÃ§Ã£o com APIs PÃºblicas**:
+  - **Brasil API**: Busca informaÃ§Ãµes de bancos e cÃ³digos.
   - **API do Banco Central**: Busca taxas de juros filtradas por segmento e modalidade.
-- **Processamento de Dados**: Consolida as informações coletadas em um formato estruturado.
+- **Processamento de Dados**: Consolida as informaÃ§Ãµes coletadas em um formato estruturado.
 - **Armazenamento de Dados**: Salva os dados processados em um arquivo JSON.
-- **Serviço Windows**: Configurado para executar periodicamente a cada 5 minutos.
-- **Logging**: Registra as operações e erros encontrados durante a execução.
+- **ServiÃ§o Windows**: Configurado para executar periodicamente a cada 5 minutos.
+- **Logging**: Registra as operaÃ§Ãµes e erros encontrados durante a execuÃ§Ã£o.
 
 ## Requisitos
 
 - **.NET 6.0** ou superior.
-- **Windows 10** ou superior para executar como Serviço Windows.
+- **Windows 10** ou superior para executar como ServiÃ§o Windows.
 - **Visual Studio 2022** para desenvolvimento.
 
-## Configuração do Projeto
+## ConfiguraÃ§Ã£o do Projeto
 
-### 1. Clonar o Repositório do GitHub
-Link do repositório: [https://github.com/LucasReginatoDev/BankDataSync.git](https://github.com/LucasReginatoDev/BankDataSync.git)
+### 1. Clonar o RepositÃ³rio do GitHub
+Link do repositÃ³rio: [https://github.com/LucasReginatoDev/BankDataSync.git](https://github.com/LucasReginatoDev/BankDataSync.git)
 
 ### 2. Compilar e Publicar o Projeto
 No Visual Studio, abra o projeto e siga os passos abaixo:
 
 - Compilar o projeto em **Release**.
-- Publicar o projeto para um diretório local:
-  1. Clique com o botão direito no projeto e selecione **Publicar**.
-  2. Escolha **Pasta** como destino e publique o projeto no diretório desejado.
+- Publicar o projeto para um diretÃ³rio local:
+  1. Clique com o botÃ£o direito no projeto e selecione **Publicar**.
+  2. Escolha **Pasta** como destino e publique o projeto no diretÃ³rio desejado.
 
-### 3. Criar o Serviço Windows
+### 3. Criar o ServiÃ§o Windows
 Abra o Prompt de Comando como administrador e execute:
 
-sc create BankDataSyncService binPath= "endereço completo para seu arquivo BankDataSync.exe" start= auto
+sc create BankDataSyncService binPath= "endereÃ§o completo para seu arquivo BankDataSync.exe" start= auto
 
-Inicie o serviço:
+Inicie o serviÃ§o:
 
 sc start BankDataSyncService
 
 
 ### 4. Verificar Logs
-Os logs são gravados em `logs/log.txt` no diretório de execução. Verifique os logs para monitorar o funcionamento do serviço e possíveis erros. O serviço gera um arquivo JSON que por padrão se encontra em: `C:\Windows\System32\DataStorage`.
+Os logs sÃ£o gravados em `logs/log.txt` no diretÃ³rio de execuÃ§Ã£o. Verifique os logs para monitorar o funcionamento do serviÃ§o e possÃ­veis erros. O serviÃ§o gera um arquivo JSON que por padrÃ£o se encontra em: `C:\Windows\System32\DataStorage`.
 
-## Padrões de Projeto Utilizados
+## PadrÃµes de Projeto Utilizados
 
 1. **Singleton**:  
-   O `JsonStorageService` é implementado como um singleton para garantir que apenas uma instância dele seja usada durante todo o ciclo de vida do serviço, evitando problemas de concorrência e melhorando a eficiência.
+   O `JsonStorageService` Ã© implementado como um singleton para garantir que apenas uma instÃ¢ncia dele seja usada durante todo o ciclo de vida do serviÃ§o, evitando problemas de concorrÃªncia e melhorando a eficiÃªncia.
 
 2. **Strategy**:  
-   O projeto adota o padrão **Strategy** para permitir diferentes estratégias de processamento de dados ao buscar e processar informações de diferentes bancos. Cada serviço (`BrasilApiService` e `BacenApiService`) implementa sua própria lógica de busca.
+   O projeto adota o padrÃ£o **Strategy** para permitir diferentes estratÃ©gias de processamento de dados ao buscar e processar informaÃ§Ãµes de diferentes bancos. Cada serviÃ§o (`BrasilApiService` e `BacenApiService`) implementa sua prÃ³pria lÃ³gica de busca.
 
-## Instruções para Configuração e Execução
+## InstruÃ§Ãµes para ConfiguraÃ§Ã£o e ExecuÃ§Ã£o
 
-1. **Publicar**: Compile e publique o projeto em um diretório acessível.
-2. **Criar Serviço Windows**: Utilize o comando `sc create` para criar o serviço no Windows.
-3. **Iniciar Serviço**: Use o comando `sc start` para iniciar o serviço.
-4. **Verificar Logs**: Monitore os logs para acompanhar a execução.
+1. **Publicar**: Compile e publique o projeto em um diretÃ³rio acessÃ­vel.
+2. **Criar ServiÃ§o Windows**: Utilize o comando `sc create` para criar o serviÃ§o no Windows.
+3. **Iniciar ServiÃ§o**: Use o comando `sc start` para iniciar o serviÃ§o.
+4. **Verificar Logs**: Monitore os logs para acompanhar a execuÃ§Ã£o.
 
-## Justificativa para a Escolha dos Padrões
+## Justificativa para a Escolha dos PadrÃµes
 
-- **Singleton**: Foi escolhido para garantir uma única instância do `JsonStorageService`, otimizando o gerenciamento de recursos e prevenindo inconsistências.
-- **Strategy**: Permite adaptar o comportamento do serviço para diferentes APIs, mantendo o código mais organizado e de fácil manutenção.
+- **Singleton**: Foi escolhido para garantir uma Ãºnica instÃ¢ncia do `JsonStorageService`, otimizando o gerenciamento de recursos e prevenindo inconsistÃªncias.
+- **Strategy**: Permite adaptar o comportamento do serviÃ§o para diferentes APIs, mantendo o cÃ³digo mais organizado e de fÃ¡cil manutenÃ§Ã£o.
 
 ## Commits
 
-Os commits estão organizados e nomeados de forma clara para refletir as mudanças realizadas, facilitando o entendimento do histórico de desenvolvimento.
+Os commits estÃ£o organizados e nomeados de forma clara para refletir as mudanÃ§as realizadas, facilitando o entendimento do histÃ³rico de desenvolvimento.
 
-## Conclusão
+## ConclusÃ£o
 
-Este projeto demonstra a integração de APIs públicas através de um serviço Windows utilizando C# (.NET 6). Ele apresenta um código bem estruturado, aplicação de padrões de projeto e uma documentação completa, além de fornecer um vídeo explicativo para auxiliar na configuração e execução.
+Este projeto demonstra a integraÃ§Ã£o de APIs pÃºblicas atravÃ©s de um serviÃ§o Windows utilizando C# (.NET 6). Apresenta um cÃ³digo estruturado, aplicaÃ§Ã£o de padrÃµes de projeto e documentaÃ§Ã£o, alÃ©m de fornecer um vÃ­deo explicativo para auxiliar na configuraÃ§Ã£o e execuÃ§Ã£o.
