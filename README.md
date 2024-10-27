@@ -1,7 +1,7 @@
 # Bank Data Sync Service
 
 ## Descrição do Projeto
-O **Bank Data Sync Service** é um serviço Windows desenvolvido em C# (.NET 6) que integra duas APIs públicas para buscar informações sobre bancos e taxas de juros. O serviço coleta dados da **Brasil API** para obter uma lista de bancos e seus códigos, e em seguida, consulta a **API do Banco Central** para obter informações de taxas de juros relacionadas a cada banco. Os dados obtidos são processados e armazenados em um arquivo JSON para futuras análises.
+O **Bank Data Sync Service** é um serviço Windows desenvolvido em C# (.NET 6) que integra duas APIs públicas para buscar informações sobre bancos e taxas de juros. O serviço coleta dados da **Brasil API** para obter uma lista de bancos e seus códigos, e em seguida, consulta a **API do Banco Central** para obter informações de taxas de juros relacionadas a cada banco. Os dados obtidos são processados e armazenados em um arquivo JSON para futuras análises. Link para o video explicativo no drive: https://drive.google.com/file/d/17Ziz5OF2ZKRQveLILvPR3xgT4GRmXg-M/view?usp=sharing
 
 ## Funcionalidades Implementadas
 
